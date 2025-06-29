@@ -5,15 +5,14 @@ description = "A Python program to generate barcode images with labels"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "jinja2>=3.1.6",
     "python-barcode>=0.15.1",
     "Pillow>=10.4.0",
-    "treepoem>=3.27.1"
 ]
 
 [project.optional-dependencies]
 dev = [
     "black>=24.8.0",
-    "flake8>=7.3.0",
     "isort>=5.13.2",
     "ruff>=0.6.8",
 ]
@@ -32,8 +31,9 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = [
-    "F",  # Pyflakes
     "E",  # Pycodestyle (errors)
+    "F",  # Pyflakes
+    "I",  # isort
     "W",  # Pycodestyle (warnings)
     "C90",  # McCabe complexity
 ]

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barcode Display</title>
+    <style>
+        .barcode-container {
+            text-align: center;
+            margin: 20px;
+        }
+        .barcode-image {
+            display: inline-block;
+        }
+        .barcode-text {
+            font-size: 40px; /* Adjust size to match barcode text */
+            font-family: Arial, sans-serif; /* Use a font similar to the barcode text */
+            margin: 5px 0; /* Reduce space between text and image */
+        }
+    </style>
+</head>
+<body>
+    {% for top_text, bottom_text, img_data in barcodes %}
+    <div class="barcode-container">
+        <div class="barcode-text">{{ top_text }}</div>
+        <img src="data:image/png;base64,{{ img_data }}" alt="Barcode" class="barcode-image">
+        <div class="barcode-text">{{ bottom_text }}</div>
+    </div>
+    {% endfor %}
+</body>
+</html>
