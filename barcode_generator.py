@@ -1,5 +1,7 @@
 import argparse
 import base64
+import json
+import random
 from io import BytesIO
 from pathlib import Path
 
@@ -8,11 +10,22 @@ import jinja2
 from barcode.writer import ImageWriter
 from PIL import Image
 
+DATA_STORE_LOCATION = 'data_store.json'
 
-def validate_number(number: str) -> int:
+
+def validate_number(number: str | None, customer_id: str) -> int:
+    used_numbers = used_numbers_by_customer_id(customer_id)
+    smallest = min(used_numbers) if used_numbers else None
+    if number is None:
+        if smallest is None:
+            return random.randint(4444444, 9999999)
+        return smallest - 1
     if not (number.isdigit() and len(number) == 7):
         raise ValueError("Number must be exactly 7 digits")
-    return int(number)
+    number = int(number)
+    if number in used_numbers:
+        raise ValueError(f"Number has already been used. Choose a number smaller than {smallest}.")
+    return number
 
 
 def create_barcode(number: str) -> Image.Image:
@@ -51,11 +64,25 @@ def render_jinja(data):
     return html_output
 
 
+def get_data_store():
+    try:
+        with open(Path(DATA_STORE_LOCATION)) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+def used_numbers_by_customer_id(customer_id):
+    data = get_data_store()
+    return set(data.get(customer_id, []))
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a barcode with a label")
-    parser.add_argument("--number", "-n", required=True, help="7-digit number to start the sequence for the barcodes.")
+    parser.add_argument("--number", "-n", default=None, help="7-digit number to start the sequence for the barcodes.")
     parser.add_argument("--label", "-l", default="Demo", help="Label text to display above the barcode")
     parser.add_argument("--output", "-o", default=None, help="Output file name (default: <number>.jpg)")
+    parser.add_argument("--customer-id", "-c", required=True, help="Customer ID")
     return parser.parse_args()
 
 
@@ -63,7 +90,7 @@ def main() -> None:
     args = parse_arguments()
 
     try:
-        number = validate_number(args.number)
+        number = validate_number(args.number, args.customer_id)
         label = args.label
         data = []
         n = number
