@@ -11,6 +11,7 @@ from barcode.writer import ImageWriter
 from PIL import Image
 
 DATA_STORE_LOCATION = 'data_store.json'
+OUTPUT_DIR = 'outputs'
 
 
 def validate_number(number: str | None, customer_id: str) -> int:
@@ -50,9 +51,17 @@ def _remove_rendered_number(barcode_img):
     return cropped_img
 
 
-def save_image(rendered_template: str, output_path: Path) -> None:
+def save_image(rendered_template: str, customer_id: str, number: int, output_path: Path | str | None) -> None:
+    if output_path is None:
+        output_dir = Path(OUTPUT_DIR)
+        output_path = output_dir / f"{customer_id} - {number}.html"
+        if not output_dir.exists():
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    elif isinstance(output_path, str):
+        output_path = Path(output_path)
     with open(output_path, "w") as f:
         f.write(rendered_template)
+    return output_path
 
 
 def render_jinja(data):
@@ -72,6 +81,13 @@ def get_data_store():
         return {}
 
 
+def update_data_store(customer_id: str, numbers: list[int]) -> None:
+    data = get_data_store()
+    data[customer_id] = data.get(customer_id, []) + numbers
+    with open(Path(DATA_STORE_LOCATION), 'w') as f:
+        return json.dump(data, f)
+
+
 def used_numbers_by_customer_id(customer_id):
     data = get_data_store()
     return set(data.get(customer_id, []))
@@ -81,7 +97,12 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a barcode with a label")
     parser.add_argument("--number", "-n", default=None, help="7-digit number to start the sequence for the barcodes.")
     parser.add_argument("--label", "-l", default="Demo", help="Label text to display above the barcode")
-    parser.add_argument("--output", "-o", default=None, help="Output file name (default: <number>.jpg)")
+    parser.add_argument(
+        "--output-path",
+        "-o",
+        default=None,
+        help="Output file name (default: outputs/{customer_id}-{number}.html)",
+    )
     parser.add_argument("--customer-id", "-c", required=True, help="Customer ID")
     return parser.parse_args()
 
@@ -91,10 +112,13 @@ def main() -> None:
 
     try:
         number = validate_number(args.number, args.customer_id)
+        customer_id = args.customer_id
         label = args.label
         data = []
+        new_numbers = []
         n = number
         for i in (1, 2, 2, 3):
+            new_numbers.append(n)
             barcode_image = create_barcode(n)
             image_io = BytesIO()
             barcode_image.save(image_io, format="PNG")
@@ -104,14 +128,15 @@ def main() -> None:
 
         rendered = render_jinja(data)
 
-        output_path = Path(args.output or f"{number}.html")
-        save_image(rendered, output_path)
-        print(f"Barcode saved to {output_path}")
+        save_location = save_image(rendered, customer_id, number, args.output_path)
+        print(f"Barcode saved to {save_location}")
+        update_data_store(customer_id, new_numbers)
 
     except ValueError as e:
         print(f"Error: {e}")
         exit(1)
     except Exception as e:
+        raise
         print(f"Unexpected error: {e}")
         exit(1)
 
