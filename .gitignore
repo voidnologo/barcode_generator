@@ -4,3 +4,5 @@ __pycache__/
 .python-version
 build/
 barcode_generator.egg-info/
+outputs/
+data_store.json
