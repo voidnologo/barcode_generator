@@ -3,11 +3,10 @@ import base64
 from io import BytesIO
 from pathlib import Path
 
-import jinja2
-from PIL import Image
-
 import barcode
+import jinja2
 from barcode.writer import ImageWriter
+from PIL import Image
 
 
 class NoTextImageWriter(ImageWriter):
