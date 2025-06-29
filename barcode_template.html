@@ -19,11 +19,14 @@
 </head>
 <body>
     {% for top_text, bottom_text, img_data in barcodes %}
-    <div class="barcode-container">
-        <div class="barcode-text">{{ top_text }}</div>
-        <img src="data:image/png;base64,{{ img_data }}" alt="Barcode" class="barcode-image">
-        <div class="barcode-text">{{ bottom_text }}</div>
-    </div>
+      <div class="barcode-container">
+          <div class="barcode-text">{{ top_text }}</div>
+          <img src="data:image/png;base64,{{ img_data }}" alt="Barcode" class="barcode-image">
+          <div class="barcode-text">{{ bottom_text }}</div>
+      </div>
+      {% if not loop.last %}
+        <hr>
+      {% endif %}
     {% endfor %}
 </body>
 </html>
