@@ -45,7 +45,7 @@ def _remove_rendered_number(barcode_img):
 
 
 def save_image(rendered_template: str, output_path: Path) -> None:
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(rendered_template)
 
 
@@ -77,9 +77,9 @@ def main() -> None:
         for i in range(1, 5):
             barcode_image = create_barcode(n)
             image_io = BytesIO()
-            barcode_image.save(image_io, format='PNG')
-            image_data = base64.b64encode(image_io.getvalue()).decode('utf-8')
-            data.append((f'{label} {i}', n, image_data))
+            barcode_image.save(image_io, format="PNG")
+            image_data = base64.b64encode(image_io.getvalue()).decode("utf-8")
+            data.append((f"{label} {i}", n, image_data))
             n -= 1
 
         rendered = render_jinja(data)
