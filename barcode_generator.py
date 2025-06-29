@@ -9,12 +9,6 @@ from barcode.writer import ImageWriter
 from PIL import Image
 
 
-class NoTextImageWriter(ImageWriter):
-    def draw_text(self, text, text_box):
-        # Override the draw_text method to do nothing, effectively removing the text
-        pass
-
-
 def validate_number(number: str) -> int:
     if not (number.isdigit() and len(number) == 7):
         raise ValueError("Number must be exactly 7 digits")
