@@ -42,14 +42,6 @@ def save_image(rendered_template: str, output_path: Path) -> None:
         f.write(rendered_template)
 
 
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a barcode with a label")
-    parser.add_argument("--number", "-n", required=True, help="7-digit number to start the sequence for the barcodes.")
-    parser.add_argument("--label", "-l", default="Demo", help="Label text to display above the barcode")
-    parser.add_argument("--output", "-o", default=None, help="Output file name (default: <number>.jpg)")
-    return parser.parse_args()
-
-
 def render_jinja(data):
     template_loader = jinja2.FileSystemLoader(searchpath="./")
     template_env = jinja2.Environment(loader=template_loader)
@@ -59,16 +51,23 @@ def render_jinja(data):
     return html_output
 
 
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate a barcode with a label")
+    parser.add_argument("--number", "-n", required=True, help="7-digit number to start the sequence for the barcodes.")
+    parser.add_argument("--label", "-l", default="Demo", help="Label text to display above the barcode")
+    parser.add_argument("--output", "-o", default=None, help="Output file name (default: <number>.jpg)")
+    return parser.parse_args()
+
+
 def main() -> None:
     args = parse_arguments()
-    NUM_LABELS = 4
 
     try:
         number = validate_number(args.number)
         label = args.label
         data = []
         n = number
-        for i in range(1, NUM_LABELS + 1):
+        for i in (1, 2, 2, 3):
             barcode_image = create_barcode(n)
             image_io = BytesIO()
             barcode_image.save(image_io, format="PNG")
