@@ -61,13 +61,14 @@ def render_jinja(data):
 
 def main() -> None:
     args = parse_arguments()
+    NUM_LABELS = 4
 
     try:
         number = validate_number(args.number)
         label = args.label
         data = []
         n = number
-        for i in range(1, 5):
+        for i in range(1, NUM_LABELS + 1):
             barcode_image = create_barcode(n)
             image_io = BytesIO()
             barcode_image.save(image_io, format="PNG")
